@@ -4,7 +4,7 @@ Implements the Drossel-Schwabl forest fire model
 
 * Visualisation using Pygame
 
-  ![1](./Demo/app.png")
+  ![1](./Demo/app.png)
 
 * Records, outputs and plots simulation statistics
 
