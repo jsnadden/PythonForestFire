@@ -12,31 +12,48 @@ class ForestFireModel:
 		self.graph = graph
 		self.growthRate = growthRate
 		self.ignitionRate = ignitionRate
-		self.state = {vertex : Status.empty for vertex in graph.vertices}
+		self.state = [{vertex : Status.empty for vertex in graph.vertices} for _ in range(2)]
+		self.bufferIndex = 0
+		self.treeCount = 0
+
+	def CurrentState(self):
+		return self.state[self.bufferIndex]
+
+	def TreeCount(self):
+		return self.treeCount
 
 	def Step(self):
-		# cache previous state
-		previousState = dict(self.state)
+		# swap state buffers
+		previousState = self.state[self.bufferIndex]
+		self.bufferIndex = (self.bufferIndex + 1) % 2
+		nextState = self.state[self.bufferIndex]
 
-		for vertex in self.state:
+		for vertex in nextState:
 			match previousState[vertex]:
 				case Status.empty:
 					# spawn trees at random
 					if random() < self.growthRate:
-						self.state[vertex] = Status.tree
+						nextState[vertex] = Status.tree
+						self.treeCount += 1
+					else:
+						nextState[vertex] = Status.empty
 
 				case Status.tree:
+					ignite = False
+
 					# fire spreads from neighbours
 					for neighbour in self.graph.vertices[vertex]:
-						if previousState[neighbour] == Status.burning:
-							self.state[vertex] = Status.burning
+						ignite |= previousState[neighbour] == Status.burning
+
 					# trees can spontaneously combust
-					if random() < self.ignitionRate:
-						self.state[vertex] = Status.burning
+					ignite |= random() < self.ignitionRate
+
+					nextState[vertex] = Status.burning if ignite else Status.tree
 
 				case Status.burning:
 					# trees burn away
-					self.state[vertex] = Status.empty
+					nextState[vertex] = Status.empty
+					self.treeCount -= 1
 
 				case _:
 					print(f"invalid cell status {previousState[vertex]}")
