@@ -1,6 +1,6 @@
 from enum import IntEnum
 from random import random
-from Graph import Graph
+from Graph import Graph, Grid
 
 class Status(IntEnum):
 	empty = 0
@@ -15,14 +15,20 @@ class ForestFireModel:
 		self.state = [{vertex : Status.empty for vertex in graph.vertices} for _ in range(2)]
 		self.bufferIndex = 0
 		self.treeCount = 0
+		self.stepCount = 0
 
 	def CurrentState(self):
 		return self.state[self.bufferIndex]
 
 	def TreeCount(self):
 		return self.treeCount
+	
+	def StepCount(self):
+		return self.stepCount
 
 	def Step(self):
+		self.stepCount += 1
+		
 		# swap state buffers
 		previousState = self.state[self.bufferIndex]
 		self.bufferIndex = (self.bufferIndex + 1) % 2
@@ -59,7 +65,15 @@ class ForestFireModel:
 					print(f"invalid cell status {previousState[vertex]}")
 					# TODO: throw exception?
 
+def GridFire(width : int, height : int, growthRate : float, ignitionRate : float):
+	grid = Grid(width, height)
+	model = ForestFireModel(graph = grid, growthRate = growthRate, ignitionRate = ignitionRate)
+	return model
 
+class GridFireRenderer:
+	def __init__(self, windowTitle: str, windowWidth : int, windowHeight : int, model : ForestFireModel):
+		#TODO
+		pass
 
 
 
